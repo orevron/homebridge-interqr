@@ -1,0 +1,37 @@
+{
+    "pluginAlias": "InterQR",
+    "pluginType": "platform",
+    "singular": true,
+    "customUi": true,
+    "headerDisplay": "Manage your InterQR locks.",
+    "schema": {
+        "type": "object",
+        "properties": {
+            "phoneNumber": {
+                "title": "Phone Number",
+                "type": "string",
+                "description": "The phone number used to login to InterQR (with country code, e.g., +1234567890)",
+                "required": true
+            },
+            "token": {
+                "title": "Authentication Token",
+                "type": "string",
+                "description": "Auth token (automatically generated via the login UI)",
+                "required": true
+            },
+            "deviceUuid": {
+                "title": "Device UUID",
+                "type": "string",
+                "description": "Device UUID (automatically generated via the login UI)",
+                "required": true
+            },
+            "updateInterval": {
+                "title": "Update Interval (minutes)",
+                "type": "integer",
+                "default": 5,
+                "description": "How often to poll the InterQR API for lock changes.",
+                "minimum": 1
+            }
+        }
+    }
+}

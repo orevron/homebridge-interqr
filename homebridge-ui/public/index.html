@@ -1,0 +1,117 @@
+<div class="card text-center" id="intro-card">
+  <div class="card-body">
+    <h5 class="card-title">InterQR Login</h5>
+    <p class="card-text">Connect to your InterQR account to control your locks from Homebridge.</p>
+    <button id="btn-start" class="btn btn-primary">Login with Phone Number</button>
+  </div>
+</div>
+
+<div class="card text-center d-none" id="phone-card">
+  <div class="card-body">
+    <h5 class="card-title">Enter Phone Number</h5>
+    <p class="card-text">Enter your phone number in international format (e.g. +1234567890).</p>
+    <div class="form-group mb-3">
+      <input type="text" class="form-control" id="phone-input" placeholder="+1234567890">
+    </div>
+    <button id="btn-request-sms" class="btn btn-primary">Send SMS Code</button>
+  </div>
+</div>
+
+<div class="card text-center d-none" id="code-card">
+  <div class="card-body">
+    <h5 class="card-title">Enter SMS Code</h5>
+    <p class="card-text">Enter the verification code sent to your phone.</p>
+    <div class="form-group mb-3">
+      <input type="text" class="form-control" id="code-input" placeholder="1234">
+    </div>
+    <button id="btn-verify-sms" class="btn btn-primary">Verify Code</button>
+  </div>
+</div>
+
+<div class="card text-center d-none" id="success-card">
+  <div class="card-body">
+    <h5 class="card-title text-success">Login Successful!</h5>
+    <p class="card-text">Your configuration has been updated. You can now close this window and restart Homebridge.</p>
+  </div>
+</div>
+
+<script>
+  (async () => {
+    // 1. Get plugin config to check if already logged in
+    const pluginConfig = await homebridge.getPluginConfig();
+    const isConfigured = pluginConfig && pluginConfig.length > 0 && pluginConfig[0].token;
+
+    if (isConfigured) {
+      document.getElementById('intro-card').innerHTML = `
+        <div class="card-body text-success">
+          <h5 class="card-title">Already Logged In</h5>
+          <p class="card-text">You are already connected to InterQR. Do you want to re-authenticate?</p>
+          <button id="btn-start" class="btn btn-warning">Re-Authenticate</button>
+        </div>
+      `;
+    }
+
+    // 2. Start flow
+    document.getElementById('btn-start')?.addEventListener('click', () => {
+      document.getElementById('intro-card').classList.add('d-none');
+      document.getElementById('phone-card').classList.remove('d-none');
+    });
+
+    let currentPhone = '';
+
+    // 3. Request SMS
+    document.getElementById('btn-request-sms').addEventListener('click', async () => {
+      currentPhone = document.getElementById('phone-input').value.trim();
+      if (!currentPhone) {
+        homebridge.toast.error('Please enter a phone number', 'Error');
+        return;
+      }
+
+      homebridge.showSpinner();
+      try {
+        await homebridge.request('/request-sms', { phone: currentPhone });
+        homebridge.hideSpinner();
+        
+        document.getElementById('phone-card').classList.add('d-none');
+        document.getElementById('code-card').classList.remove('d-none');
+        homebridge.toast.success('SMS code sent to your phone', 'Success');
+      } catch (err) {
+        homebridge.hideSpinner();
+        homebridge.toast.error(err.message || 'Failed to request SMS', 'Error');
+      }
+    });
+
+    // 4. Verify SMS
+    document.getElementById('btn-verify-sms').addEventListener('click', async () => {
+      const code = document.getElementById('code-input').value.trim();
+      if (!code) {
+        homebridge.toast.error('Please enter the SMS code', 'Error');
+        return;
+      }
+
+      homebridge.showSpinner();
+      try {
+        const response = await homebridge.request('/verify-sms', { phone: currentPhone, code: code });
+        
+        // Update plugin config
+        const config = pluginConfig && pluginConfig.length > 0 ? pluginConfig[0] : { name: "InterQR" };
+        config.phoneNumber = currentPhone;
+        config.token = response.token;
+        config.deviceUuid = response.deviceUuid;
+        
+        await homebridge.updatePluginConfig([config]);
+        await homebridge.savePluginConfig();
+        
+        homebridge.hideSpinner();
+        
+        document.getElementById('code-card').classList.add('d-none');
+        document.getElementById('success-card').classList.remove('d-none');
+        homebridge.toast.success('Login Successful! Please restart Homebridge.', 'Success');
+      } catch (err) {
+        homebridge.hideSpinner();
+        homebridge.toast.error(err.message || 'Failed to verify SMS', 'Error');
+      }
+    });
+
+  })();
+</script>

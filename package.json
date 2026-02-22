@@ -1,0 +1,45 @@
+{
+    "name": "homebridge-interqr",
+    "displayName": "Homebridge InterQR",
+    "version": "1.0.0",
+    "description": "Homebridge plugin for InterQR smart locks",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/orevron/homebridge-interqr.git"
+    },
+    "bugs": {
+        "url": "https://github.com/orevron/homebridge-interqr/issues"
+    },
+    "engines": {
+        "node": "^18.14.0 || ^20.0.0 || ^22.0.0",
+        "homebridge": "^1.6.0"
+    },
+    "main": "dist/index.js",
+    "scripts": {
+        "lint": "eslint src/**.ts --max-warnings=0",
+        "watch": "npm run build && npm run link && nodemon",
+        "build": "rimraf dist && tsc",
+        "prepublishOnly": "npm run lint && npm run build"
+    },
+    "keywords": [
+        "homebridge-plugin",
+        "interqr",
+        "smart-lock",
+        "lock"
+    ],
+    "dependencies": {
+        "axios": "^1.6.0"
+    },
+    "devDependencies": {
+        "@homebridge/plugin-ui-utils": "^1.0.1",
+        "@types/node": "^20.0.0",
+        "@typescript-eslint/eslint-plugin": "^7.0.0",
+        "@typescript-eslint/parser": "^7.0.0",
+        "eslint": "^8.0.0",
+        "homebridge": "^1.8.0",
+        "nodemon": "^3.0.0",
+        "rimraf": "^5.0.0",
+        "typescript": "^5.4.0"
+    }
+}
