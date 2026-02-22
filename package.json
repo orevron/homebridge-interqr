@@ -6,10 +6,13 @@
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "git://github.com/orevron/homebridge-interqr.git"
+        "url": "git+https://github.com/orevron/homebridge-interqr.git"
     },
     "bugs": {
         "url": "https://github.com/orevron/homebridge-interqr/issues"
+    },
+    "publishConfig": {
+        "access": "public"
     },
     "engines": {
         "node": "^18.14.0 || ^20.0.0 || ^22.0.0",
